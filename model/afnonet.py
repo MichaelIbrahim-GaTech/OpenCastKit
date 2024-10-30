@@ -6,7 +6,7 @@ import torch.nn.functional as F
 
 from timm.models.layers import DropPath, to_2tuple, trunc_normal_
 import torch.fft
-from utils.params import get_args
+from utils.params import get_fourcastnet_args
 from torch.utils.checkpoint import checkpoint_sequential
 
 
@@ -33,7 +33,7 @@ class Mlp(nn.Module):
 class AdaptiveFourierNeuralOperator(nn.Module):
     def __init__(self, dim, h=14, w=8):
         super().__init__()
-        args = get_args()
+        args = get_fourcastnet_args()
         self.hidden_size = dim
         self.h = h
         self.w = w
@@ -90,7 +90,7 @@ class AdaptiveFourierNeuralOperator(nn.Module):
 class Block(nn.Module):
     def __init__(self, dim, mlp_ratio=4., drop=0., drop_path=0., act_layer=nn.GELU, norm_layer=nn.LayerNorm, h=14, w=8):
         super().__init__()
-        args = get_args()
+        args = get_fourcastnet_args()
         self.norm1 = norm_layer(dim)
         self.filter = AdaptiveFourierNeuralOperator(dim, h=h, w=w)
 
@@ -215,7 +215,7 @@ class AFNONet(nn.Module):
         x += self.pos_embed
         x = self.pos_drop(x)
 
-        if not get_args().checkpoint_activations:
+        if not get_fourcastnet_args().checkpoint_activations:
             for blk in self.blocks:
                 x = blk(x)
         else:
